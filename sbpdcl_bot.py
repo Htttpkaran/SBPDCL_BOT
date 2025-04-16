@@ -138,10 +138,10 @@ if __name__ == "__main__":
         logger.info("🚀 Bot started with webhook.")
         
         # Set webhook URL (replace <YOUR_DOMAIN> with your Railway domain)
-        WEBHOOK_URL = "worker-production-f324.up.railway.app"
+        WEBHOOK_URL = "https://api.telegram.org/bot8173105415:AAEnDhresHul5i0EWQm9fuMHyedVuIdnnR0/setWebhook?url=https://worker-production-f324.up.railway.app/webhook"
         app.run_webhook(
             listen="0.0.0.0",
-            port=int(os.getenv("PORT", 8443)),
+            port=int(os.getenv("PORT", 8080)),
             webhook_url=f"{WEBHOOK_URL}/{TOKEN}"
         )
     except Exception as e:
