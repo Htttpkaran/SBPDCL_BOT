@@ -136,8 +136,15 @@ if __name__ == "__main__":
         # Schedule the hourly update job
         app.job_queue.run_repeating(hourly_update, interval=3600, first=0)
 
-        logger.info("🚀 Bot started.")
-        app.run_polling()
+        logger.info("🚀 Bot started with webhook.")
+        
+        # Set webhook URL (replace <YOUR_DOMAIN> with your Railway domain)
+        WEBHOOK_URL = "worker-production-3017.up.railway.app"
+        app.run_webhook(
+            listen="0.0.0.0",
+            port=int(os.getenv("PORT", 8443)),
+            webhook_url=f"{WEBHOOK_URL}/{TOKEN}"
+        )
     except Exception as e:
         logger.critical(f"❌ Failed to start the bot: {e}")
         exit("Bot initialization failed.")
