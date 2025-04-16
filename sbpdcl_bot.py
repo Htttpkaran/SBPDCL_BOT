@@ -30,6 +30,7 @@ def fetch_data(ca_number: str) -> tuple:
     for the supplied ca_number.
     Returns a tuple: (balance, connection_status, current_time)
     """
+    driver = None  # Initialize the driver variable
     try:
         options = webdriver.ChromeOptions()
         options.add_argument("--headless")
@@ -65,10 +66,11 @@ def fetch_data(ca_number: str) -> tuple:
         connection_status = f"Error: {e}"
         now = datetime.now().strftime("%d-%m-%Y, %H:%M:%S")
     finally:
-        try:
-            driver.quit()
-        except Exception as e:
-            logger.warning(f"⚠️ Failed to close the driver: {e}")
+        if driver:  # Ensure the driver is quit only if it was initialized
+            try:
+                driver.quit()
+            except Exception as e:
+                logger.warning(f"⚠️ Failed to close the driver: {e}")
     return balance, connection_status, now
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
