@@ -74,7 +74,6 @@ def fetch_data(ca_number: str) -> tuple:
     return balance, connection_status, now
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    chat_id = update.message.chat_id
     await update.message.reply_text(
         "Welcome to ⚡ *Smart Meter Bot* ⚡\nSend me your *CA Number* to get your current balance.\n\nYou'll now receive hourly updates.",
         parse_mode='Markdown'
