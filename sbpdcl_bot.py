@@ -138,7 +138,7 @@ if __name__ == "__main__":
         logger.info("🚀 Bot started with webhook.")
         
         # Set webhook URL (replace <YOUR_DOMAIN> with your Railway domain)
-        WEBHOOK_URL = "worker-production-3017.up.railway.app"
+        WEBHOOK_URL = "worker-production-f324.up.railway.app"
         app.run_webhook(
             listen="0.0.0.0",
             port=int(os.getenv("PORT", 8443)),
