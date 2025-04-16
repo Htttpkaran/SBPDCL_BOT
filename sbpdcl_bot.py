@@ -14,8 +14,8 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Load Telegram bot token
-TOKEN = "8173105415:AAEnDhresHul5i0EWQm9fuMHyedVuIdnnR0"
+# Load Telegram bot token from environment variables
+TOKEN = os.getenv("TOKEN")
 
 if not TOKEN:
     logger.error("❌ TELEGRAM_BOT_TOKEN is not set. Please set it as an environment variable.")
