@@ -132,7 +132,7 @@ if __name__ == "__main__":
         app.add_error_handler(handle_error)
 
         # Schedule the hourly update job
-        app.job_queue.run_repeating(hourly_update, interval=30, first=0)
+        app.job_queue.run_repeating(hourly_update, interval=3600, first=0)
 
         logger.info("🚀 Bot started.")
         app.run_polling()
