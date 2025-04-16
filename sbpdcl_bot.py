@@ -10,7 +10,7 @@ import time
 import os
 import logging
 
-# Logging setup for debugging
+# Logging setup
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -21,16 +21,11 @@ if not TOKEN:
     logger.error("❌ TELEGRAM_BOT_TOKEN is not set. Please set it as an environment variable.")
     exit("Environment variable TELEGRAM_BOT_TOKEN is missing.")
 
-# Replace subscribers set with a dictionary to map chat_id to CA Number
-subscribers = {}  # {chat_id: ca_number}
+# Subscribers dictionary: chat_id -> ca_number
+subscribers = {}
 
 def fetch_data(ca_number: str) -> tuple:
-    """
-    Synchronously fetches balance and connection status from the website
-    for the supplied ca_number.
-    Returns a tuple: (balance, connection_status, current_time)
-    """
-    driver = None  # Initialize the driver variable
+    driver = None
     try:
         options = webdriver.ChromeOptions()
         options.add_argument("--headless")
@@ -40,23 +35,18 @@ def fetch_data(ca_number: str) -> tuple:
         driver = webdriver.Chrome(options=options)
         driver.get("https://sbpdcl.co.in/frmQuickBillPaymentAll.aspx")
 
-        # Wait and fill CA number
         WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, "MainContent_txtCANO")))
         driver.find_element(By.ID, "MainContent_txtCANO").send_keys(ca_number)
 
-        # Click submit button
         WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.ID, "MainContent_btnSubmit")))
         driver.find_element(By.ID, "MainContent_btnSubmit").click()
 
-        # Wait for new page to load and click "Get Current Balance"
         WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, "MainContent_btnCurrentblnce")))
         driver.find_element(By.ID, "MainContent_btnCurrentblnce").click()
 
-        # Wait for modal dialog and extract balance
         WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, "MainContent_txtCurrentblnce")))
         balance = driver.find_element(By.ID, "MainContent_txtCurrentblnce").get_attribute("value").strip()
 
-        # Extract connection status
         WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, "MainContent_lblcnStatus")))
         connection_status = driver.find_element(By.ID, "MainContent_lblcnStatus").text.strip()
 
@@ -66,7 +56,7 @@ def fetch_data(ca_number: str) -> tuple:
         connection_status = f"Error: {e}"
         now = datetime.now().strftime("%d-%m-%Y, %H:%M:%S")
     finally:
-        if driver:  # Ensure the driver is quit only if it was initialized
+        if driver:
             try:
                 driver.quit()
             except Exception as e:
@@ -81,8 +71,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def get_balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ca_number = update.message.text.strip()
-    
-    # Save subscriber's CA number
     subscribers[update.message.chat_id] = ca_number
 
     await update.message.reply_text("🔍 Fetching your balance, please wait...")
@@ -132,18 +120,19 @@ if __name__ == "__main__":
         app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), get_balance))
         app.add_error_handler(handle_error)
 
-        # Schedule the hourly update job
         app.job_queue.run_repeating(hourly_update, interval=3600, first=0)
 
         logger.info("🚀 Bot started with webhook.")
-        
-        # Set webhook URL (replace <YOUR_DOMAIN> with your Railway domain)
-        WEBHOOK_URL = "https://api.telegram.org/bot8173105415:AAEnDhresHul5i0EWQm9fuMHyedVuIdnnR0/setWebhook?url=https://worker-production-f324.up.railway.app/webhook"
+
+        # ✅ Correct webhook URL
+        RAILWAY_DOMAIN = "https://worker-production-f324.up.railway.app"
+
         app.run_webhook(
             listen="0.0.0.0",
             port=int(os.getenv("PORT", 8080)),
-            webhook_url=f"{WEBHOOK_URL}/{TOKEN}"
+            webhook_url=f"{RAILWAY_DOMAIN}/webhook"
         )
+
     except Exception as e:
         logger.critical(f"❌ Failed to start the bot: {e}")
         exit("Bot initialization failed.")
