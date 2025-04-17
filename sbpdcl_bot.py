@@ -9,6 +9,8 @@ import asyncio
 import time
 import os
 import logging
+import pytz
+
 
 # Logging setup
 logging.basicConfig(level=logging.INFO)
@@ -53,12 +55,14 @@ def fetch_data(ca_number: str) -> tuple:
 
         WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, "MainContent_lblcnStatus")))
         connection_status = driver.find_element(By.ID, "MainContent_lblcnStatus").text.strip()
+        
+        ist = pytz.timezone('Asia/Kolkata')
+        now = datetime.now(ist).strftime("%d-%m-%Y, %H:%M:%S")
 
-        now = datetime.now().strftime("%d-%m-%Y, %H:%M:%S")
     except Exception as e:
         balance = None
         connection_status = f"Error: {e}"
-        now = datetime.now().strftime("%d-%m-%Y, %H:%M:%S")
+        now = datetime.now(ist).strftime("%d-%m-%Y, %H:%M:%S")
     finally:
         if driver:
             try:
@@ -84,7 +88,7 @@ async def get_balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if balance:
         await update.message.reply_text(
             f"✅ *CA Number:* `{ca_number}`\n\n💡 *Current Balance:* ₹{balance}\n\n"
-            f"🔌 *Connection Status:* {connection_status}\n\n",
+            f"🔌 *Connection Status:* {connection_status}\n\n 📅 *Date & Time:* {now}",
             parse_mode='Markdown'
         )
     else:
@@ -126,7 +130,7 @@ if __name__ == "__main__":
         app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), get_balance))
         app.add_error_handler(handle_error)
 
-        app.job_queue.run_repeating(hourly_update, interval=60, first=10)
+        app.job_queue.run_repeating(hourly_update, interval=3600, first=10)
 
         logger.info("🚀 Bot started with webhook.")
 
