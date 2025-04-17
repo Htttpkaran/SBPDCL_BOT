@@ -28,11 +28,15 @@ def fetch_data(ca_number: str) -> tuple:
     driver = None
     try:
         options = webdriver.ChromeOptions()
+        options.binary_location = "/usr/bin/chromium"  # Or adjust based on Docker
         options.add_argument("--headless")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disable-gpu")
+        options.add_argument("--window-size=1920x1080")
 
         driver = webdriver.Chrome(options=options)
+
         driver.get("https://sbpdcl.co.in/frmQuickBillPaymentAll.aspx")
 
         WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, "MainContent_txtCANO")))
