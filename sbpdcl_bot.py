@@ -14,16 +14,16 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Load Telegram bot token from environment variables
+# Load Telegram Bot Token from Environment
 TOKEN = os.getenv("TOKEN")
-
 if not TOKEN:
     logger.error("❌ TELEGRAM_BOT_TOKEN is not set. Please set it as an environment variable.")
     exit("Environment variable TELEGRAM_BOT_TOKEN is missing.")
 
-# Subscribers dictionary: chat_id -> ca_number
+# Subscriber data: {chat_id: ca_number}
 subscribers = {}
 
+# Fetch data function using Selenium
 def fetch_data(ca_number: str) -> tuple:
     driver = None
     try:
@@ -63,6 +63,7 @@ def fetch_data(ca_number: str) -> tuple:
                 logger.warning(f"⚠️ Failed to close the driver: {e}")
     return balance, connection_status, now
 
+# Handlers
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "Welcome to ⚡ *Smart Meter Bot* ⚡\nSend me your *CA Number* to get your current balance.\n\nYou'll now receive hourly updates.",
@@ -112,6 +113,7 @@ async def handle_error(update: object, context: ContextTypes.DEFAULT_TYPE):
     if isinstance(update, Update) and update.message:
         await update.message.reply_text("🚫 Internal error occurred. Please try again later.")
 
+# Start the bot with webhook
 if __name__ == "__main__":
     try:
         app = ApplicationBuilder().token(TOKEN).build()
@@ -120,17 +122,32 @@ if __name__ == "__main__":
         app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), get_balance))
         app.add_error_handler(handle_error)
 
-        app.job_queue.run_repeating(hourly_update, interval=3600, first=0)
+        app.job_queue.run_repeating(hourly_update, interval=3600, first=10)
 
         logger.info("🚀 Bot started with webhook.")
 
-        # ✅ Correct webhook URL
-        RAILWAY_DOMAIN = "https://worker-production-f324.up.railway.app"
+        # Railway provides a domain like: https://worker-production-xyz.up.railway.app
+        RAILWAY_DOMAIN = os.getenv("RAILWAY_DOMAIN")
+        if not RAILWAY_DOMAIN:
+            logger.critical("❌ RAILWAY_DOMAIN environment variable is missing.")
+            exit()
 
+        webhook_url = f"{RAILWAY_DOMAIN}/webhook"
+
+        # Set webhook
+        import httpx
+        resp = httpx.post(
+            f"https://api.telegram.org/bot{TOKEN}/setWebhook",
+            params={"url": webhook_url}
+        )
+        logger.info(f"🔗 Webhook set: {resp.json()}")
+
+        # Run with webhook
         app.run_webhook(
             listen="0.0.0.0",
             port=int(os.getenv("PORT", 8080)),
-            webhook_url=f"{RAILWAY_DOMAIN}/webhook"
+            webhook_path="/webhook",
+            webhook_url=webhook_url
         )
 
     except Exception as e:
