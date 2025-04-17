@@ -126,7 +126,7 @@ if __name__ == "__main__":
         app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), get_balance))
         app.add_error_handler(handle_error)
 
-        app.job_queue.run_repeating(hourly_update, interval=3600, first=10)
+        app.job_queue.run_repeating(hourly_update, interval=60, first=10)
 
         logger.info("🚀 Bot started with webhook.")
 
