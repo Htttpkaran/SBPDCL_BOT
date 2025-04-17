@@ -84,7 +84,7 @@ async def get_balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if balance:
         await update.message.reply_text(
             f"✅ *CA Number:* `{ca_number}`\n\n💡 *Current Balance:* ₹{balance}\n\n"
-            f"🔌 *Connection Status:* {connection_status}\n\n📅 *Date & Time:* {now}",
+            f"🔌 *Connection Status:* {connection_status}\n\n",
             parse_mode='Markdown'
         )
     else:
