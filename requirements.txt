@@ -1,4 +1,4 @@
-python-telegram-bot==20.8
-selenium==4.18.1
-httpx==0.27.0
-apscheduler==3.10.4
+python-telegram-bot==20.7
+selenium==4.19.0
+httpx
+apscheduler
