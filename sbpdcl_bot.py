@@ -132,7 +132,7 @@ if __name__ == "__main__":
             logger.critical("❌ RAILWAY_DOMAIN environment variable is missing.")
             exit()
 
-        webhook_url = f"{RAILWAY_DOMAIN}/webhook"
+        webhook_url = f"{RAILWAY_DOMAIN}"
 
         # Set webhook
         import httpx
